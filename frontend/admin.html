@@ -2,19 +2,43 @@
 <html>
 <body>
 
-<h2>Admin Panel - Create Test</h2>
+<h2>Admin Panel</h2>
+
+<!-- LOGIN -->
+<input id="adminPass" placeholder="Enter Admin Password">
+<button onclick="checkLogin()">Login</button>
+
+<div id="panel" style="display:none;">
+
+<h3>Create Test</h3>
 
 <input id="id" placeholder="Test ID"><br><br>
-
 <input id="title" placeholder="Title"><br><br>
-
 <textarea id="passage" placeholder="Passage"></textarea><br><br>
-
 <input id="audio" placeholder="Audio URL"><br><br>
 
 <button onclick="create()">Create Test</button>
 
+</div>
+
 <script>
+
+const ADMIN_PASSWORD = "Krati*2302";  // 🔥 change this
+
+function checkLogin(){
+
+let p = document.getElementById("adminPass").value;
+
+if(p === ADMIN_PASSWORD){
+document.getElementById("panel").style.display = "block";
+alert("Access granted")
+}else{
+alert("Wrong password")
+}
+
+}
+
+// CREATE TEST
 async function create(){
 
 await fetch("https://ssc-steno-skill-test-practice.onrender.com/create-test",{
@@ -29,6 +53,7 @@ audio: document.getElementById("audio").value
 })
 
 alert("Test Created")
+
 }
 </script>
 
