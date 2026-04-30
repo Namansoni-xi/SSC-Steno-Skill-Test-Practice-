@@ -1,211 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>SSC Steno Skill Test</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f5f7fb;
-}
-
-.top{
-  background:#1a237e;
-  color:white;
-  padding:12px;
-  font-size:18px;
-}
-
-.box{
-  background:white;
-  padding:15px;
-  margin:10px;
-  border-radius:8px;
-}
-
-textarea{
-  width:100%;
-  height:200px;
-  font-size:16px;
-}
-
-button{
-  width:100%;
-  padding:10px;
-  background:#1a237e;
-  color:white;
-  border:none;
-  margin-top:5px;
-}
-
-select, input{
-  width:100%;
-  padding:8px;
-  margin-top:5px;
-}
-</style>
+  <title>SSC Steno Login</title>
 </head>
-
 <body>
 
-<div class="top">SSC Steno Skill Test</div>
+<h2>Login</h2>
 
-<!-- LOGIN -->
-<div class="box">
-<input id="name" placeholder="Enter Name">
-<input id="pass" placeholder="Password">
+<input id="username" placeholder="Username"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
 <button onclick="login()">Login</button>
-</div>
 
-<!-- TEST AREA -->
-<div class="box">
-<select id="test" onchange="loadTest()"></select>
-
-<br><br>
-
-<audio id="audio" controls></audio>
-
-<br><br>
-
-<textarea id="text" placeholder="Type your transcription here..."></textarea>
-
-<button onclick="submitTest()">Submit Test</button>
-
-<div id="result"></div>
-</div>
-
-<!-- HISTORY -->
-<div class="box">
-<h3>History</h3>
-<div id="history"></div>
-</div>
-
-<!-- LEADERBOARD -->
-<div class="box">
-<h3>Leaderboard</h3>
-<div id="leader"></div>
-</div>
+<p id="msg"></p>
 
 <script>
+async function login() {
+  const res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  });
 
-let userName = ""
+  const data = await res.json();
 
-// LOGIN
-async function login(){
-
-let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-name:document.getElementById("name").value,
-password:document.getElementById("pass").value
-})
-})
-
-let data = await res.json()
-
-if(data.msg=="success"){
-userName = document.getElementById("name").value
-alert("Login success")
-
-loadTests()
-loadHistory()
-loadLeaderboard()
-}else{
-alert("Login failed")
+  if (res.ok) {
+    localStorage.setItem("user", data.username);
+    window.location.href = "test.html";
+  } else {
+    document.getElementById("msg").innerText = "Login Failed";
+  }
 }
-}
-
-
-// LOAD TEST LIST
-async function loadTests(){
-
-let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/tests")
-let data = await res.json()
-
-let s = document.getElementById("test")
-s.innerHTML=""
-
-data.forEach(t=>{
-let o=document.createElement("option")
-o.value=t.id
-o.innerText=t.title
-s.appendChild(o)
-})
-
-loadTest()
-}
-
-
-// LOAD SINGLE TEST (audio)
-async function loadTest(){
-
-let id = document.getElementById("test").value
-
-let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/test/"+id)
-let data = await res.json()
-
-document.getElementById("audio").src = data.audio
-}
-
-
-// SUBMIT
-async function submitTest(){
-
-let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/submit",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-name:userName,
-user_text:document.getElementById("text").value,
-test_id:parseInt(document.getElementById("test").value)
-})
-})
-
-let d = await res.json()
-
-document.getElementById("result").innerHTML =
-"<h3>Result</h3>" +
-"Full: "+d.full+"<br>"+
-"Half: "+d.half+"<br>"+
-"Error: "+d["error%"]+"%<br><br>"+
-d.highlight
-}
-
-
-// HISTORY
-async function loadHistory(){
-
-let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/history/"+userName)
-let data = await res.json()
-
-let html=""
-
-data.forEach(r=>{
-html += "Test "+r.test_id+" → Error: "+r.result["error%"]+"%<br>"
-})
-
-document.getElementById("history").innerHTML = html
-}
-
-
-// LEADERBOARD
-async function loadLeaderboard(){
-
-let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/leaderboard")
-let data = await res.json()
-
-let html=""
-
-data.forEach((r,i)=>{
-html += (i+1)+". "+r.name+" → "+r.result["error%"]+"%<br>"
-})
-
-document.getElementById("leader").innerHTML = html
-}
-
 </script>
 
 </body>
