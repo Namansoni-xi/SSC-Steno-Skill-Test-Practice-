@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 from evaluator import evaluate, highlight
 
+result["highlight"] = highlight(master, data.user_text)
+
 app = FastAPI()
 
 client = MongoClient("YOUR_MONGO_URL")
