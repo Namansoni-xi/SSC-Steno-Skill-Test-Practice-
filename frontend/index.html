@@ -116,7 +116,7 @@ async function submitTest(){
 
   try {
 
-    let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/submit", {
+    let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({user:text})
