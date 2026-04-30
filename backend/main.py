@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = MongoClient("YOUR_MONGO_URL")
+client = MongoClient("mongodb+srv://username:password@cluster.mongodb.net/")
 db = client["steno"]
 
 users = db["users"]
