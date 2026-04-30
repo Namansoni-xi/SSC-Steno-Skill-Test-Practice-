@@ -63,16 +63,22 @@ body{
 const API="https://ssc-steno-skill-test-practice.onrender.com";
 
 async function load(){
-let res=await fetch(API+"/tests");
-let data=await res.json();
+
+let res = await fetch(API+"/tests?"+Date.now());
+let data = await res.json();
 
 let html="";
 
 data.forEach(t=>{
 html+=`
 <div class="card" onclick="start(${t.id})">
-<div class="title">Test ${t.id}</div>
-<div>${t.title}</div>
+Test ${t.id} - ${t.title}
+</div>
+`;
+});
+
+tests.innerHTML=html;
+}
 <div class="time">⏱ ${t.dictation_time} + ${t.transcription_time} min</div>
 </div>
 `;
