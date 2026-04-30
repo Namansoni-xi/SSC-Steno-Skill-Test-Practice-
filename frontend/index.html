@@ -1,39 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SSC Steno Login</title>
+<title>SSC Steno</title>
 </head>
 <body>
 
-<h2>Login</h2>
+<h2>SSC Steno Login</h2>
 
 <input id="username" placeholder="Username"><br><br>
 <input id="password" type="password" placeholder="Password"><br><br>
 
 <button onclick="login()">Login</button>
+<button onclick="signup()">Signup</button>
 
 <p id="msg"></p>
 
 <script>
-async function login() {
-  const res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/login", {
+
+const API = "https://ssc-steno-skill-test-practice.onrender.com";
+
+// SIGNUP
+async function signup() {
+  const res = await fetch(API + "/signup", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      username: document.getElementById("username").value,
+      name: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  });
+
+  const data = await res.json();
+  document.getElementById("msg").innerText = data.msg;
+}
+
+// LOGIN
+async function login() {
+  const res = await fetch(API + "/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      name: document.getElementById("username").value,
       password: document.getElementById("password").value
     })
   });
 
   const data = await res.json();
 
-  if (res.ok) {
-    localStorage.setItem("user", data.username);
+  if (data.msg === "success") {
+    localStorage.setItem("user", document.getElementById("username").value);
     window.location.href = "test.html";
   } else {
     document.getElementById("msg").innerText = "Login Failed";
   }
 }
+
 </script>
 
 </body>
