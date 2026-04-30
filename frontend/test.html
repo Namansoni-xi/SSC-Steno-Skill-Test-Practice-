@@ -109,28 +109,12 @@ button{
 </div>
 
 <script>
+  <script>
 
 const API = "https://ssc-steno-skill-test-practice.onrender.com";
 
-// USER
-document.getElementById("user").innerText =
-localStorage.getItem("user");
-
-// TIMER
-let time = 600;
-
-setInterval(()=>{
-time--;
-let m = Math.floor(time/60);
-let s = time%60;
-
-document.getElementById("timer").innerText =
-m+":"+(s<10?"0"+s:s);
-
-if(time<=0){
-submitTest();
-}
-},1000);
+let phase = "dictation";
+let time = 0;
 
 // LOAD TEST
 async function load(){
@@ -140,9 +124,50 @@ let data = await res.json();
 window.test = data[0];
 
 document.getElementById("audio").src = test.audio;
+
+// dictation start
+time = test.dictation_time * 60;
+startTimer();
 }
 
 load();
+
+// TIMER
+function startTimer(){
+
+let interval = setInterval(()=>{
+
+time--;
+
+let m = Math.floor(time/60);
+let s = time%60;
+
+document.getElementById("timer").innerText =
+m+":"+(s<10?"0"+s:s);
+
+// PHASE CHANGE
+if(time <= 0){
+
+if(phase === "dictation"){
+
+phase = "transcription";
+
+document.getElementById("audio").pause();
+document.getElementById("text").disabled = false;
+
+time = test.transcription_time * 60;
+
+alert("Start Typing Now");
+
+}else{
+clearInterval(interval);
+submitTest();
+}
+
+}
+
+},1000);
+}
 
 // SUBMIT
 async function submitTest(){
@@ -160,11 +185,13 @@ test_id: test.id
 let d = await res.json();
 
 document.getElementById("result").innerHTML =
-"<b>Error:</b> "+d["error%"]+"%<br><br>"+d.highlight;
+"Error: "+d["error%"]+"%<br><br>"+d.highlight;
 
 }
 
 </script>
+
+b> 
 
 </body>
 </html>
