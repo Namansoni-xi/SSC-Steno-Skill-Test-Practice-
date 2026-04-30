@@ -16,7 +16,6 @@ body{
   padding:12px;
   display:flex;
   justify-content:space-between;
-  font-weight:bold;
 }
 
 .container{
@@ -36,23 +35,16 @@ textarea{
   font-size:16px;
   padding:10px;
   margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ddd;
 }
 
 button{
-  padding:12px;
   width:100%;
+  padding:12px;
   margin-top:10px;
   background:#1a237e;
   color:white;
   border:none;
   border-radius:8px;
-  font-size:16px;
-}
-
-.timer{
-  font-size:16px;
 }
 </style>
 </head>
@@ -60,17 +52,18 @@ button{
 <body>
 
 <div class="header">
-<div>SSC Steno Test</div>
-<div class="timer" id="timer"></div>
+<div>SSC Test</div>
+<div id="timer"></div>
 </div>
 
 <div class="container">
 
 <div class="card">
 
-<audio id="audio" controls></audio>
+<!-- 🔴 AUDIO (OPTIONAL) -->
+<audio id="audio" controls style="display:none"></audio>
 
-<textarea id="text" disabled placeholder="Typing will start after dictation..."></textarea>
+<textarea id="text" disabled placeholder="Typing starts after dictation..."></textarea>
 
 <button onclick="submitTest()">Submit</button>
 
@@ -99,7 +92,11 @@ let test=data.find(t=>t.id==id);
 
 window.test=test;
 
+// 🎧 अगर audio है तभी दिखे
+if(test.audio){
+audio.style.display="block";
 audio.src=test.audio;
+}
 
 time=test.dictation_time*60;
 
@@ -122,14 +119,10 @@ timer.innerText=m+":"+(s<10?"0"+s:s);
 if(time<=0){
 
 if(phase==="dictation"){
-
 phase="typing";
 text.disabled=false;
-
 time=test.transcription_time*60;
-
-alert("Start Typing Now");
-
+alert("Start Typing");
 }else{
 clearInterval(interval);
 submitTest();
