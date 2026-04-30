@@ -1,3 +1,4 @@
+from evaluator import breakdown
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pymongo import MongoClient
@@ -84,6 +85,10 @@ def submit(data: Submit):
 
     result = evaluate(master, data.user_text)
     result["highlight"] = highlight(master, data.user_text)
+    result["breakdown"] = breakdown(master, data.user_text)
+    result["total_words"] = len(master.split())
+    result["accuracy"] = round(100 - result["error%"], 2)
+    
 
     results.insert_one({
         "name": data.name,
@@ -101,3 +106,25 @@ def all_results():
 @app.get("/users")
 def get_users():
     return list(users.find({}, {"_id": 0}))
+
+@app.get("/rank/{name}")
+def get_rank(name: str):
+
+    data = list(results.find({}, {"_id":0}))
+    data.sort(key=lambda x: x["result"]["error%"])
+
+    rank = 1
+    total = len(data)
+
+    for i, r in enumerate(data):
+        if r["name"] == name:
+            rank = i + 1
+            break
+
+    percentile = round((total - rank)/total * 100,2)
+
+    return {
+        "rank": rank,
+        "percentile": percentile,
+        "total": total
+    }
