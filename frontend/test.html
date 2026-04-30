@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>SSC Steno Skill Test</title>
+<title>SSC Test</title>
 
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:#f0f2f5;
+  font-family:Segoe UI;
+  background:#f4f6f9;
 }
 
 .header{
@@ -17,22 +16,18 @@ body{
   padding:12px;
   display:flex;
   justify-content:space-between;
+  font-weight:bold;
 }
 
 .container{
-  display:flex;
+  padding:20px;
 }
 
-.left{
-  width:70%;
-  padding:15px;
-}
-
-.right{
-  width:30%;
+.card{
   background:white;
-  padding:15px;
-  border-left:2px solid #ddd;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 textarea{
@@ -40,67 +35,46 @@ textarea{
   height:300px;
   font-size:16px;
   padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
 }
 
 button{
-  padding:10px 20px;
+  padding:12px;
+  width:100%;
+  margin-top:10px;
   background:#1a237e;
   color:white;
   border:none;
-  cursor:pointer;
-  margin-top:5px;
+  border-radius:8px;
+  font-size:16px;
 }
 
 .timer{
-  font-size:18px;
-  font-weight:bold;
-}
-
-.result{
-  background:#fff;
-  padding:10px;
-  margin-top:10px;
-  border-radius:5px;
+  font-size:16px;
 }
 </style>
-
 </head>
 
 <body>
 
 <div class="header">
-  <div>SSC Steno Skill Test</div>
-  <div class="timer">Time Left: <span id="timer">00:00</span></div>
+<div>SSC Steno Test</div>
+<div class="timer" id="timer"></div>
 </div>
 
 <div class="container">
 
-<div class="left">
+<div class="card">
 
-<h3>Audio Dictation</h3>
-<audio id="audio" controls controlsList="nodownload noplaybackrate"></audio>
+<audio id="audio" controls></audio>
 
-<h3>Type Here</h3>
-<textarea id="text" disabled></textarea>
+<textarea id="text" disabled placeholder="Typing will start after dictation..."></textarea>
 
-<button onclick="submitTest()">Submit Early</button>
+<button onclick="submitTest()">Submit</button>
 
-<div id="result" class="result"></div>
-
-</div>
-
-<div class="right">
-
-<h3>Instructions</h3>
-<ul>
-<li>Fullscreen mode required</li>
-<li>No copy/paste allowed</li>
-<li>Typing allowed only after dictation</li>
-<li>Auto submit after time</li>
-</ul>
-
-<h3>User</h3>
-<p id="user"></p>
+<div id="result"></div>
 
 </div>
 
@@ -108,78 +82,51 @@ button{
 
 <script>
 
-const API = "https://ssc-steno-skill-test-practice.onrender.com";
+const API="https://ssc-steno-skill-test-practice.onrender.com";
 
-let phase = "dictation";
-let time = 0;
+let phase="dictation";
+let time=0;
 let interval;
-let switchCount = 0;
 
-// USER
-document.getElementById("user").innerText =
-localStorage.getItem("user");
-
-// 🔒 FULLSCREEN
-document.documentElement.requestFullscreen();
-
-// ❌ COPY PASTE DISABLE
-document.addEventListener("copy", e => e.preventDefault());
-document.addEventListener("paste", e => e.preventDefault());
-
-// 🔴 TAB SWITCH DETECT
-document.addEventListener("visibilitychange", function(){
-if(document.hidden){
-switchCount++;
-alert("Tab switch detected!");
-
-if(switchCount >= 2){
-alert("Exam terminated!");
-submitTest();
-}
-}
-});
-
-// LOAD TEST
 async function load(){
-let res = await fetch(API+"/tests");
-let data = await res.json();
 
-window.test = data[0];
+let id=localStorage.getItem("test_id");
 
-document.getElementById("audio").src = test.audio;
+let res=await fetch(API+"/tests");
+let data=await res.json();
 
-// dictation start
-time = test.dictation_time * 60;
+let test=data.find(t=>t.id==id);
+
+window.test=test;
+
+audio.src=test.audio;
+
+time=test.dictation_time*60;
 
 startTimer();
 }
 
 load();
 
-// TIMER
 function startTimer(){
 
-interval = setInterval(()=>{
+interval=setInterval(()=>{
 
 time--;
 
-let m = Math.floor(time/60);
-let s = time%60;
+let m=Math.floor(time/60);
+let s=time%60;
 
-document.getElementById("timer").innerText =
-m+":"+(s<10?"0"+s:s);
+timer.innerText=m+":"+(s<10?"0"+s:s);
 
-// PHASE SWITCH
-if(time <= 0){
+if(time<=0){
 
-if(phase === "dictation"){
+if(phase==="dictation"){
 
-phase = "transcription";
+phase="typing";
+text.disabled=false;
 
-document.getElementById("audio").pause();
-document.getElementById("text").disabled = false;
-
-time = test.transcription_time * 60;
+time=test.transcription_time*60;
 
 alert("Start Typing Now");
 
@@ -193,58 +140,21 @@ submitTest();
 },1000);
 }
 
-// 🎧 REWIND DISABLE
-document.getElementById("audio").addEventListener("seeking", function(){
-if(phase === "dictation"){
-this.currentTime = 0;
-}
-});
-
-// 🚀 SUBMIT
 async function submitTest(){
 
-clearInterval(interval);
-
-let res = await fetch(API+"/submit",{
+let res=await fetch(API+"/submit",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-name: localStorage.getItem("user"),
-user_text: document.getElementById("text").value,
-test_id: test.id
+name:localStorage.getItem("user"),
+user_text:text.value,
+test_id:test.id
 })
 });
 
-let d = await res.json();
+let d=await res.json();
 
-// RESULT UI
-let html = `
-<b>Error:</b> ${d["error%"]}% <br>
-<b>Accuracy:</b> ${d.accuracy}% <br>
-<b>Total Words:</b> ${d.total_words} <br><br>
-`;
-
-// WORD BREAKDOWN
-d.breakdown.forEach(w=>{
-if(w.status==="correct"){
-html += `<span style="color:green">${w.word}</span> `;
-}else{
-html += `<span style="color:red">${w.word}</span> `;
-}
-});
-
-// RANK
-let r = await fetch(API+"/rank/"+localStorage.getItem("user"));
-let rank = await r.json();
-
-html += `
-<br><br>
-<b>Rank:</b> ${rank.rank} / ${rank.total}<br>
-<b>Percentile:</b> ${rank.percentile}%
-`;
-
-document.getElementById("result").innerHTML = html;
-
+result.innerHTML=`<b>Error:</b> ${d["error%"]}%`;
 }
 
 </script>
