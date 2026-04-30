@@ -15,6 +15,10 @@ document.body.innerHTML="Access Denied";
 <input id="title" placeholder="Title"><br><br>
 <textarea id="passage"></textarea><br><br>
 <input id="audio" placeholder="Audio URL"><br><br>
+  <br><br>
+<input id="dictation" placeholder="Dictation Time (min)">
+<br><br>
+<input id="transcription" placeholder="Typing Time (min)">
 
 <button onclick="create()">Create</button>
 
@@ -41,8 +45,9 @@ body:JSON.stringify({
 id:parseInt(id.value),
 title:title.value,
 passage:passage.value,
-audio:audio.value
-})
+audio:audio.value,
+dictation_time:parseInt(dictation.value),
+transcription_time:parseInt(transcription.value)
 })
 alert("Test Created");
 loadTests();
