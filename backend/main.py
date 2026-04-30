@@ -4,7 +4,6 @@ from pymongo import MongoClient
 from evaluator import evaluate, highlight
 from fastapi.middleware.cors import CORSMiddleware
 
-result["highlight"] = highlight(master, data.user_text)
 
 app = FastAPI()
 app.add_middleware(
