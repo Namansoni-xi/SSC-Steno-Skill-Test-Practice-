@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SSC Test</title>
+<title>SSC Test</title>
 </head>
 <body>
 
 <h2>SSC Steno Test</h2>
 
-<button onclick="loadTest()">Load Test</button>
+<p id="user"></p>
 
-<div id="test"></div>
+<select id="test"></select><br><br>
 
 <textarea id="text" rows="10" cols="50"></textarea><br><br>
 
@@ -18,30 +18,48 @@
 <div id="result"></div>
 
 <script>
-async function loadTest() {
-  const res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/tests");
+
+const API = "https://ssc-steno-skill-test-practice.onrender.com";
+
+// show username
+document.getElementById("user").innerText =
+"User: " + localStorage.getItem("user");
+
+// load tests
+async function loadTests(){
+  const res = await fetch(API + "/tests");
   const data = await res.json();
 
-  window.test = data[0];
+  let s = document.getElementById("test");
 
-  document.getElementById("test").innerText = "Audio Loaded (play manually)";
+  data.forEach(t=>{
+    let o = document.createElement("option");
+    o.value = t.id;
+    o.innerText = t.title;
+    s.appendChild(o);
+  });
 }
 
-async function submitTest() {
-  const res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/submit", {
+loadTests();
+
+// submit
+async function submitTest(){
+  const res = await fetch(API + "/submit", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      test_id: test.id,
-      user_text: document.getElementById("text").value
+      name: localStorage.getItem("user"),
+      user_text: document.getElementById("text").value,
+      test_id: parseInt(document.getElementById("test").value)
     })
   });
 
-  const data = await res.json();
+  const d = await res.json();
 
-  document.getElementById("result").innerText =
-    "Mistakes: " + data.total_mistakes;
+  document.getElementById("result").innerHTML =
+    "Error: "+d["error%"]+"%<br><br>"+d.highlight;
 }
+
 </script>
 
 </body>
