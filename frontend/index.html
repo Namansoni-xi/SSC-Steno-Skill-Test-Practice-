@@ -1,138 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>SSC Steno Skill Test</title>
-
-<style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#e9edf5;
-}
-
-/* TOP BAR */
-.topbar {
-  background:#1a237e;
-  color:white;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-}
-
-.timer {
-  background:red;
-  padding:5px 10px;
-  border-radius:4px;
-}
-
-/* MAIN */
-.container {
-  padding:15px;
-}
-
-/* AUDIO */
-.audio-box {
-  background:white;
-  padding:10px;
-  border-radius:6px;
-  margin-bottom:10px;
-}
-
-/* TEXT AREA */
-textarea {
-  width:100%;
-  height:220px;
-  font-size:16px;
-  padding:10px;
-  border-radius:5px;
-}
-
-/* BUTTON */
-button {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:#1a237e;
-  color:white;
-  border:none;
-  border-radius:5px;
-  font-size:16px;
-}
-
-/* RESULT */
-.result {
-  background:white;
-  margin-top:10px;
-  padding:10px;
-  border-radius:5px;
-}
-</style>
-
+<title>SSC Steno</title>
 </head>
 
 <body>
 
-<div class="topbar">
-<div>SSC Steno Skill Test</div>
-<div class="timer" id="timer">10:00</div>
-</div>
+<h2>SSC Steno Test</h2>
 
-<div class="container">
+<input id="name" placeholder="Enter Name"><br><br>
 
-<div class="audio-box">
-<b>Audio Dictation</b><br><br>
-<audio controls>
-  <source src="test.mp3" type="audio/mpeg">
-</audio>
-</div>
+<select id="test">
+  <option value="1">Test 1</option>
+  <option value="2">Test 2</option>
+</select>
 
-<textarea id="text" placeholder="Type here..."></textarea>
+<br><br>
 
-<button onclick="submitTest()">Submit Test</button>
+<textarea id="text" rows="10" cols="40"></textarea>
 
-<div class="result" id="result"></div>
+<br><br>
 
-</div>
+<button onclick="submitTest()">Submit</button>
+
+<div id="result"></div>
 
 <script>
 
-// TIMER
-let time = 600;
-
-setInterval(() => {
-  let m = Math.floor(time/60);
-  let s = time%60;
-  document.getElementById("timer").innerText =
-    m + ":" + (s<10?"0"+s:s);
-  time--;
-},1000);
-
-
-// SUBMIT FUNCTION
 async function submitTest(){
 
-  let text = document.getElementById("text").value;
+let res = await fetch("https://YOUR-BACKEND.onrender.com/submit", {
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name: document.getElementById("name").value,
+user: document.getElementById("text").value,
+test_id: parseInt(document.getElementById("test").value)
+})
+})
 
-  try {
+let data = await res.json()
 
-    let res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/submit", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({user:text})
-    });
+document.getElementById("result").innerHTML =
+"Full: "+data.full+"<br>"+
+"Half: "+data.half+"<br>"+
+"Error: "+data["error%"]
 
-    let data = await res.json();
-
-    document.getElementById("result").innerHTML =
-    "<h3>Result</h3>" +
-    "Full Mistakes: " + data.full + "<br>" +
-    "Half Mistakes: " + data.half + "<br>" +
-    "Error %: " + data["error%"];
-
-  } catch(e){
-    alert("Error: Server connect nahi ho raha");
-  }
 }
 
 </script>
