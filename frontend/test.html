@@ -69,7 +69,7 @@ button{
 
 <div class="header">
   <div>SSC Steno Skill Test</div>
-  <div class="timer">Time Left: <span id="timer">45:00</span></div>
+  <div class="timer">Time Left: <span id="timer">00:00</span></div>
 </div>
 
 <div class="container">
@@ -80,7 +80,7 @@ button{
 <audio id="audio" controls></audio>
 
 <h3>Type Here</h3>
-<textarea id="text" placeholder="Start typing here..."></textarea>
+<textarea id="text" placeholder="Start typing here..." disabled></textarea>
 
 <br><br>
 
@@ -96,9 +96,9 @@ button{
 
 <ul>
 <li>Listen carefully</li>
-<li>Type without mistakes</li>
+<li>Typing allowed only after dictation</li>
 <li>Do not refresh page</li>
-<li>Submit before time ends</li>
+<li>Auto submit after time</li>
 </ul>
 
 <h3>User</h3>
@@ -109,12 +109,15 @@ button{
 </div>
 
 <script>
-  <script>
 
 const API = "https://ssc-steno-skill-test-practice.onrender.com";
 
 let phase = "dictation";
 let time = 0;
+
+// show user
+document.getElementById("user").innerText =
+localStorage.getItem("user");
 
 // LOAD TEST
 async function load(){
@@ -125,8 +128,12 @@ window.test = data[0];
 
 document.getElementById("audio").src = test.audio;
 
-// dictation start
+// start dictation
 time = test.dictation_time * 60;
+
+// typing disabled initially
+document.getElementById("text").disabled = true;
+
 startTimer();
 }
 
@@ -145,7 +152,7 @@ let s = time%60;
 document.getElementById("timer").innerText =
 m+":"+(s<10?"0"+s:s);
 
-// PHASE CHANGE
+// PHASE SWITCH
 if(time <= 0){
 
 if(phase === "dictation"){
@@ -185,13 +192,11 @@ test_id: test.id
 let d = await res.json();
 
 document.getElementById("result").innerHTML =
-"Error: "+d["error%"]+"%<br><br>"+d.highlight;
+"<b>Error:</b> "+d["error%"]+"%<br><br>"+d.highlight;
 
 }
 
 </script>
-
-b> 
 
 </body>
 </html>
