@@ -86,7 +86,7 @@ button{
 <button onclick="submitTest()">Submit Early</button>
 
 <div id="result" class="result"></div>
-
+  
 </div>
 
 <div class="right">
@@ -206,6 +206,25 @@ let d = await res.json();
 document.getElementById("result").innerHTML =
 "<b>Error:</b> "+d["error%"]+"%<br><br>"+d.highlight;
 
+let switchCount = 0;
+
+document.addEventListener("visibilitychange", function(){
+
+if(document.hidden){
+
+switchCount++;
+
+alert("Tab switch detected!");
+
+if(switchCount >= 2){
+alert("Exam terminated!");
+submitTest();
+}
+
+}
+
+});
+  
 }
 
 </script>
