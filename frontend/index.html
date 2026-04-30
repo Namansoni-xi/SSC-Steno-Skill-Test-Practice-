@@ -1,58 +1,189 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SSC Steno</title>
+<meta charset="UTF-8">
+<title>SSC Steno Portal</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  overflow:hidden;
+}
+
+/* 🔥 Animated background */
+body::before{
+  content:"";
+  position:absolute;
+  width:200%;
+  height:200%;
+  background: radial-gradient(circle,#42a5f5,transparent 70%);
+  animation: move 8s linear infinite;
+  opacity:0.2;
+}
+
+@keyframes move{
+  0%{transform:translate(-20%,-20%)}
+  50%{transform:translate(20%,20%)}
+  100%{transform:translate(-20%,-20%)}
+}
+
+/* Glass card */
+.container{
+  position:relative;
+  width:350px;
+  padding:30px;
+  border-radius:20px;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  text-align:center;
+  color:white;
+}
+
+/* 🔥 Logo glow */
+.logo{
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:5px;
+  background: linear-gradient(90deg,#42a5f5,#90caf9);
+  -webkit-background-clip:text;
+  color:transparent;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow{
+  from{text-shadow:0 0 5px #42a5f5;}
+  to{text-shadow:0 0 20px #90caf9;}
+}
+
+.sub{
+  font-size:12px;
+  margin-bottom:20px;
+  opacity:0.8;
+}
+
+/* Input */
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:10px;
+  outline:none;
+}
+
+/* Buttons */
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#42a5f5;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  background:#1e88e5;
+  transform:scale(1.05);
+}
+
+.alt{
+  background:#90caf9;
+  color:black;
+}
+
+.alt:hover{
+  background:#64b5f6;
+}
+
+/* Message */
+.msg{
+  margin-top:10px;
+  font-size:13px;
+  color:#ffcccb;
+}
+
+.footer{
+  margin-top:15px;
+  font-size:12px;
+  opacity:0.7;
+}
+</style>
+
 </head>
+
 <body>
 
-<h2>SSC Steno Login</h2>
+<div class="container">
 
-<input id="username" placeholder="Username"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
+<div class="logo">⚡ SSC STENO</div>
+<div class="sub">AI Powered Skill Test Portal</div>
+
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
 
 <button onclick="login()">Login</button>
-<button onclick="signup()">Signup</button>
+<button class="alt" onclick="signup()">Create Account</button>
 
-<p id="msg"></p>
+<div id="msg" class="msg"></div>
+
+<div class="footer">Powered by Your Coaching 🚀</div>
+
+</div>
 
 <script>
 
 const API = "https://ssc-steno-skill-test-practice.onrender.com";
 
-// SIGNUP
-async function signup() {
-  const res = await fetch(API + "/signup", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      name: document.getElementById("username").value,
-      password: document.getElementById("password").value
-    })
-  });
+// LOGIN
+async function login(){
+let res = await fetch(API+"/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name: username.value,
+password: password.value
+})
+});
 
-  const data = await res.json();
-  document.getElementById("msg").innerText = data.msg;
+let d = await res.json();
+
+if(d.msg==="success"){
+localStorage.setItem("user", username.value);
+window.location.href="test.html";
+}else{
+msg.innerText="Invalid Login ❌";
+}
 }
 
-// LOGIN
-async function login() {
-  const res = await fetch(API + "/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      name: document.getElementById("username").value,
-      password: document.getElementById("password").value
-    })
-  });
+// SIGNUP
+async function signup(){
+let res = await fetch(API+"/signup",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name: username.value,
+password: password.value
+})
+});
 
-  const data = await res.json();
-
-  if (data.msg === "success") {
-    localStorage.setItem("user", document.getElementById("username").value);
-    window.location.href = "test.html";
-  } else {
-    document.getElementById("msg").innerText = "Login Failed";
-  }
+let d = await res.json();
+msg.innerText=d.msg;
 }
 
 </script>
