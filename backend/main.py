@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pymongo import MongoClient
-from evaluator import evaluate, highlight
 from fastapi.middleware.cors import CORSMiddleware
 
+from evaluator import evaluate, highlight
 
 app = FastAPI()
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,7 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = MongoClient("mongodb+srv://Namansoni23:Krati*2302@shorthandpractice.c2ku6fe.mongodb.net/?appName=ShorthandPractice")
+# 🔴 MongoDB (अपना नया password डालो)
+client = MongoClient("mongodb+srv://Namansoni23:Krati*2302@shorthandpractice.c2ku6fe.mongodb.net/")
 db = client["steno"]
 
 users = db["users"]
@@ -52,7 +55,7 @@ def login(data: User):
         return {"msg": "success"}
     return {"msg": "invalid"}
 
-# -------- ADMIN --------
+# -------- TEST --------
 @app.post("/create-test")
 def create_test(data: Test):
     tests.insert_one(data.dict())
@@ -62,6 +65,11 @@ def create_test(data: Test):
 def get_tests():
     return list(tests.find({}, {"_id": 0}))
 
+@app.delete("/delete-test/{id}")
+def delete_test(id: int):
+    tests.delete_one({"id": int(id)})
+    return {"msg": "deleted"}
+
 @app.get("/test/{id}")
 def get_test(id: int):
     return tests.find_one({"id": id}, {"_id": 0})
@@ -69,7 +77,6 @@ def get_test(id: int):
 # -------- SUBMIT --------
 @app.post("/submit")
 def submit(data: Submit):
-
     t = tests.find_one({"id": data.test_id})
     master = t["passage"]
 
@@ -84,14 +91,11 @@ def submit(data: Submit):
 
     return result
 
-# -------- DASHBOARD --------
-@app.get("/history/{name}")
-def history(name: str):
-    return list(results.find({"name": name}, {"_id": 0}))
+# -------- ADMIN --------
+@app.get("/all-results")
+def all_results():
+    return list(results.find({}, {"_id": 0}))
 
-# -------- LEADERBOARD --------
-@app.get("/leaderboard")
-def leaderboard():
-    data = list(results.find({}, {"_id": 0}))
-    data.sort(key=lambda x: x["result"]["error%"])
-    return data[:10]
+@app.get("/users")
+def get_users():
+    return list(users.find({}, {"_id": 0}))
