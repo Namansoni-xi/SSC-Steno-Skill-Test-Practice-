@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Admin Panel - Create Test</h2>
+
+<input id="id" placeholder="Test ID"><br><br>
+
+<input id="title" placeholder="Title"><br><br>
+
+<textarea id="passage" placeholder="Passage"></textarea><br><br>
+
+<input id="audio" placeholder="Audio URL"><br><br>
+
+<button onclick="create()">Create Test</button>
+
+<script>
+async function create(){
+
+await fetch("https://ssc-steno-skill-test-practice.onrender.com/create-test",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+id: parseInt(document.getElementById("id").value),
+title: document.getElementById("title").value,
+passage: document.getElementById("passage").value,
+audio: document.getElementById("audio").value
+})
+})
+
+alert("Test Created")
+}
+</script>
+
+</body>
+</html>
