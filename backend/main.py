@@ -34,6 +34,8 @@ class Test(BaseModel):
     title: str
     passage: str
     audio: str
+    dictation_time: int
+    transcription_time: int
 
 class Submit(BaseModel):
     name: str
