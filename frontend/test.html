@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SSC Test</title>
+</head>
+<body>
+
+<h2>SSC Steno Test</h2>
+
+<button onclick="loadTest()">Load Test</button>
+
+<div id="test"></div>
+
+<textarea id="text" rows="10" cols="50"></textarea><br><br>
+
+<button onclick="submitTest()">Submit</button>
+
+<div id="result"></div>
+
+<script>
+async function loadTest() {
+  const res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/tests");
+  const data = await res.json();
+
+  window.test = data[0];
+
+  document.getElementById("test").innerText = "Audio Loaded (play manually)";
+}
+
+async function submitTest() {
+  const res = await fetch("https://ssc-steno-skill-test-practice.onrender.com/submit", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      test_id: test.id,
+      user_text: document.getElementById("text").value
+    })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("result").innerText =
+    "Mistakes: " + data.total_mistakes;
+}
+</script>
+
+</body>
+</html>
