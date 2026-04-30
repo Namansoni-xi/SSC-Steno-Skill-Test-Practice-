@@ -95,3 +95,21 @@ def highlight(master, user):
         j += 1
 
     return " ".join(out)
+
+def breakdown(master, user):
+
+    m = master.split()
+    u = user.split()
+
+    result = []
+
+    for i in range(max(len(m), len(u))):
+        mw = m[i] if i < len(m) else ""
+        uw = u[i] if i < len(u) else ""
+
+        if mw == uw:
+            result.append({"word": uw, "status": "correct"})
+        else:
+            result.append({"word": uw, "status": "wrong"})
+
+    return result
