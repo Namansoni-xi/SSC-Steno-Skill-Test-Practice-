@@ -108,7 +108,7 @@ const API="https://ssc-steno-skill-test-practice.onrender.com";
 // CREATE
 async function create(){
 
-await fetch(API+"/create_test",{
+let res = await fetch(API+"/create_test",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -121,8 +121,11 @@ transcription_time:parseInt(transcription.value)
 })
 });
 
-alert("Test Created");
-load();
+let d = await res.json();
+
+alert(d.msg || "Created");
+
+load(); // 🔥 reload list
 }
 
 // LOAD
