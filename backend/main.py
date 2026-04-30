@@ -59,14 +59,14 @@ def login(data: User):
     return {"msg": "invalid"}
 
 # -------- TEST --------
-@app.post("/create-test")
+@app.post("/create_test")
 def create_test(data: Test):
     tests.insert_one(data.dict())
-    return {"msg": "test added"}
+    return {"msg": "created"}
 
 @app.get("/tests")
 def get_tests():
-    return list(tests.find({}, {"_id": 0}))
+    return list(tests.find({}, {"_id":0}))
 
 @app.delete("/delete-test/{id}")
 def delete_test(id: int):
