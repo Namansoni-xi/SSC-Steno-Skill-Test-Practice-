@@ -2,59 +2,99 @@
 <html>
 <body>
 
-<h2>Admin Panel</h2>
+<script>
+if(prompt("Enter Admin Password")!="12345"){
+document.body.innerHTML="Access Denied";
+}
+</script>
 
-<!-- LOGIN -->
-<input id="adminPass" placeholder="Enter Admin Password">
-<button onclick="checkLogin()">Login</button>
-
-<div id="panel" style="display:none;">
+<h2>ADMIN PANEL</h2>
 
 <h3>Create Test</h3>
-
-<input id="id" placeholder="Test ID"><br><br>
+<input id="id" placeholder="ID"><br><br>
 <input id="title" placeholder="Title"><br><br>
-<textarea id="passage" placeholder="Passage"></textarea><br><br>
+<textarea id="passage"></textarea><br><br>
 <input id="audio" placeholder="Audio URL"><br><br>
 
-<button onclick="create()">Create Test</button>
+<button onclick="create()">Create</button>
 
-</div>
+<hr>
+
+<h3>All Tests</h3>
+<div id="tests"></div>
+
+<hr>
+
+<h3>All Results</h3>
+<div id="results"></div>
 
 <script>
 
-const ADMIN_PASSWORD = "Krati*2302";  // 🔥 change this
+const API = "https://ssc-steno-skill-test-practice.onrender.com";
 
-function checkLogin(){
-
-let p = document.getElementById("adminPass").value;
-
-if(p === ADMIN_PASSWORD){
-document.getElementById("panel").style.display = "block";
-alert("Access granted")
-}else{
-alert("Wrong password")
-}
-
-}
-
-// CREATE TEST
+// CREATE
 async function create(){
-
-await fetch("https://ssc-steno-skill-test-practice.onrender.com/create-test",{
+await fetch(API+"/create-test",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-id: parseInt(document.getElementById("id").value),
-title: document.getElementById("title").value,
-passage: document.getElementById("passage").value,
-audio: document.getElementById("audio").value
+id:parseInt(id.value),
+title:title.value,
+passage:passage.value,
+audio:audio.value
 })
 })
-
-alert("Test Created")
-
+alert("Test Created");
+loadTests();
 }
+
+// LOAD TESTS
+async function loadTests(){
+let res = await fetch(API+"/tests");
+let data = await res.json();
+
+let html="";
+
+data.forEach(t=>{
+html += `
+<div>
+<b>${t.id} - ${t.title}</b>
+<button onclick="del(${t.id})">Delete</button>
+</div>`;
+});
+
+document.getElementById("tests").innerHTML = html;
+}
+
+// DELETE
+async function del(id){
+await fetch(API+"/delete-test/"+id,{
+method:"DELETE"
+});
+alert("Deleted");
+loadTests();
+}
+
+// RESULTS
+async function loadResults(){
+let res = await fetch(API+"/all-results");
+let data = await res.json();
+
+let html="";
+
+data.forEach(r=>{
+html += `
+<div>
+${r.name} | Test ${r.test_id} | Error ${r.result["error%"]}%
+</div>`;
+});
+
+document.getElementById("results").innerHTML = html;
+}
+
+loadTests();
+loadResults();
+
 </script>
 
 </body>
