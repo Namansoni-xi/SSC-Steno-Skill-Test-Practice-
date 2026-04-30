@@ -1,111 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>SSC Steno Skill Test</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f0f2f5;
-}
-
-.header{
-  background:#1a237e;
-  color:white;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-}
-
-.container{
-  display:flex;
-}
-
-.left{
-  width:70%;
-  padding:15px;
-}
-
-.right{
-  width:30%;
-  background:white;
-  padding:15px;
-  border-left:2px solid #ddd;
-}
-
-textarea{
-  width:100%;
-  height:300px;
-  font-size:16px;
-  padding:10px;
-}
-
-button{
-  padding:10px 20px;
-  background:#1a237e;
-  color:white;
-  border:none;
-  cursor:pointer;
-  margin-top:5px;
-}
-
-.timer{
-  font-size:18px;
-  font-weight:bold;
-}
-
-.result{
-  background:#fff;
-  padding:10px;
-  margin-top:10px;
-  border-radius:5px;
-}
-</style>
-
-</head>
-
-<body>
-
-<div class="header">
-  <div>SSC Steno Skill Test</div>
-  <div class="timer">Time Left: <span id="timer">00:00</span></div>
-</div>
-
-<div class="container">
-
-<div class="left">
-
-<h3>Audio Dictation</h3>
-<audio id="audio" controls controlsList="nodownload noplaybackrate"></audio>
-
-<h3>Type Here</h3>
-<textarea id="text" disabled></textarea>
-
-<button onclick="submitTest()">Submit Early</button>
-
-<div id="result" class="result"></div>
-  
-</div>
-
-<div class="right">
-
-<h3>Instructions</h3>
-<ul>
-<li>Fullscreen mode required</li>
-<li>No copy/paste allowed</li>
-<li>Typing allowed only after dictation</li>
-<li>Auto submit after time</li>
-</ul>
-
-<h3>User</h3>
-<p id="user"></p>
-
-</div>
-
-</div>
-
 <script>
 
 const API = "https://ssc-steno-skill-test-practice.onrender.com";
@@ -113,6 +5,7 @@ const API = "https://ssc-steno-skill-test-practice.onrender.com";
 let phase = "dictation";
 let time = 0;
 let interval;
+let switchCount = 0;
 
 // USER
 document.getElementById("user").innerText =
@@ -124,6 +17,24 @@ document.documentElement.requestFullscreen();
 // ❌ COPY PASTE DISABLE
 document.addEventListener("copy", e => e.preventDefault());
 document.addEventListener("paste", e => e.preventDefault());
+
+// 🔴 TAB SWITCH DETECT (🔥 सही जगह)
+document.addEventListener("visibilitychange", function(){
+
+if(document.hidden){
+
+switchCount++;
+
+alert("Tab switch detected!");
+
+if(switchCount >= 2){
+alert("Exam terminated!");
+submitTest();
+}
+
+}
+
+});
 
 // LOAD TEST
 async function load(){
@@ -203,31 +114,34 @@ test_id: test.id
 
 let d = await res.json();
 
-document.getElementById("result").innerHTML =
-"<b>Error:</b> "+d["error%"]+"%<br><br>"+d.highlight;
+// 🔥 NEW RESULT UI
+let html = `
+<b>Error:</b> ${d["error%"]}% <br>
+<b>Accuracy:</b> ${d.accuracy}% <br>
+<b>Total Words:</b> ${d.total_words} <br><br>
+`;
 
-let switchCount = 0;
-
-document.addEventListener("visibilitychange", function(){
-
-if(document.hidden){
-
-switchCount++;
-
-alert("Tab switch detected!");
-
-if(switchCount >= 2){
-alert("Exam terminated!");
-submitTest();
+// 🔴 WORD BREAKDOWN
+d.breakdown.forEach(w=>{
+if(w.status==="correct"){
+html += `<span style="color:green">${w.word}</span> `;
+}else{
+html += `<span style="color:red">${w.word}</span> `;
 }
-
-}
-
 });
-  
+
+// 🏆 RANK FETCH
+let r = await fetch(API+"/rank/"+localStorage.getItem("user"));
+let rank = await r.json();
+
+html += `
+<br><br>
+<b>Rank:</b> ${rank.rank} / ${rank.total}<br>
+<b>Percentile:</b> ${rank.percentile}%
+`;
+
+document.getElementById("result").innerHTML = html;
+
 }
 
 </script>
-
-</body>
-</html>
