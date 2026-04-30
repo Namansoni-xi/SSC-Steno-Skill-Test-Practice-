@@ -1,34 +1,47 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import json
+from fastapi import FastAPI
+from pydantic import BaseModel
+from pymongo import MongoClient
 from evaluator import evaluate
 
-class Handler(BaseHTTPRequestHandler):
+app = FastAPI()
 
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.end_headers()
+# MongoDB
+client = MongoClient("YOUR_MONGO_URL")
+db = client["steno"]
+tests = db["tests"]
+results = db["results"]
 
-    def do_POST(self):
-        if self.path == "/submit":
+class SubmitData(BaseModel):
+    name: str
+    user: str
+    test_id: int
 
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length)
-            data = json.loads(body)
+# create test (admin use)
+@app.post("/create-test")
+def create_test(data: dict):
+    tests.insert_one(data)
+    return {"msg": "test created"}
 
-            master = "The government has announced new policies for development"
+# get test
+@app.get("/test/{id}")
+def get_test(id: int):
+    t = tests.find_one({"id": id}, {"_id": 0})
+    return t
 
-            result = evaluate(master, data["user"])
+# submit
+@app.post("/submit")
+def submit(data: SubmitData):
 
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")  # 🔥 important
-            self.end_headers()
+    t = tests.find_one({"id": data.test_id})
 
-            self.wfile.write(json.dumps(result).encode())
+    master = t["passage"]
 
-server = HTTPServer(("0.0.0.0", 8000), Handler)
-print("Server running...")
-server.serve_forever()
+    result = evaluate(master, data.user)
+
+    results.insert_one({
+        "name": data.name,
+        "test_id": data.test_id,
+        "result": result
+    })
+
+    return result
