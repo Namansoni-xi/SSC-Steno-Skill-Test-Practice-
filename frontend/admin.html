@@ -1,44 +1,114 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+}
+
+.header{
+  padding:15px;
+  font-size:20px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.container{
+  display:flex;
+  gap:20px;
+  padding:20px;
+  flex-wrap:wrap;
+}
+
+.card{
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(10px);
+  padding:20px;
+  border-radius:15px;
+  width:350px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+input,textarea{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:none;
+  border-radius:8px;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#42a5f5;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#1e88e5;
+}
+
+.list{
+  margin-top:20px;
+}
+
+.item{
+  background:rgba(255,255,255,0.1);
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+}
+</style>
+</head>
+
 <body>
 
-<script>
-if(prompt("Enter Admin Password")!="12345"){
-document.body.innerHTML="Access Denied";
-}
-</script>
+<div class="header">⚙️ Admin Panel - Create Test</div>
 
-<h2>ADMIN PANEL</h2>
+<div class="container">
 
-<h3>Create Test</h3>
-<input id="id" placeholder="ID"><br><br>
-<input id="title" placeholder="Title"><br><br>
-<textarea id="passage"></textarea><br><br>
-<input id="audio" placeholder="Audio URL"><br><br>
-  <br><br>
+<div class="card">
+
+<input id="id" placeholder="Test ID">
+<input id="title" placeholder="Title">
+<textarea id="passage" placeholder="Dictation Passage"></textarea>
+
+<input id="audio" placeholder="Audio URL (optional)">
 <input id="dictation" placeholder="Dictation Time (min)">
-<br><br>
 <input id="transcription" placeholder="Typing Time (min)">
 
-<button onclick="create()">Create</button>
+<button onclick="create()">Create Test</button>
 
-<hr>
+</div>
 
+<div class="card">
 <h3>All Tests</h3>
-<div id="tests"></div>
+<div id="list"></div>
+</div>
 
-<hr>
-
-<h3>All Results</h3>
-<div id="results"></div>
+</div>
 
 <script>
 
-const API = "https://ssc-steno-skill-test-practice.onrender.com";
+const API="https://ssc-steno-skill-test-practice.onrender.com";
 
 // CREATE
 async function create(){
-await fetch(API+"/create-test",{
+
+await fetch(API+"/create_test",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -49,56 +119,40 @@ audio:audio.value,
 dictation_time:parseInt(dictation.value),
 transcription_time:parseInt(transcription.value)
 })
+});
+
 alert("Test Created");
-loadTests();
+load();
 }
 
-// LOAD TESTS
-async function loadTests(){
-let res = await fetch(API+"/tests");
-let data = await res.json();
+// LOAD
+async function load(){
+let res=await fetch(API+"/tests");
+let data=await res.json();
 
 let html="";
 
 data.forEach(t=>{
-html += `
-<div>
-<b>${t.id} - ${t.title}</b>
+html+=`
+<div class="item">
+<div>Test ${t.id}</div>
 <button onclick="del(${t.id})">Delete</button>
-</div>`;
+</div>
+`;
 });
 
-document.getElementById("tests").innerHTML = html;
+list.innerHTML=html;
 }
+
+load();
 
 // DELETE
 async function del(id){
-await fetch(API+"/delete-test/"+id,{
-method:"DELETE"
-});
-alert("Deleted");
-loadTests();
+
+await fetch(API+"/delete/"+id,{method:"DELETE"});
+
+load();
 }
-
-// RESULTS
-async function loadResults(){
-let res = await fetch(API+"/all-results");
-let data = await res.json();
-
-let html="";
-
-data.forEach(r=>{
-html += `
-<div>
-${r.name} | Test ${r.test_id} | Error ${r.result["error%"]}%
-</div>`;
-});
-
-document.getElementById("results").innerHTML = html;
-}
-
-loadTests();
-loadResults();
 
 </script>
 
