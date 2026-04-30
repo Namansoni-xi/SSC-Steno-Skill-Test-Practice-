@@ -18,7 +18,7 @@ app.add_middleware(
 )
 
 # 🔴 MongoDB (अपना नया password डालो)
-client = MongoClient("mongodb+srv://Namansoni23:Krati*2302@shorthandpractice.c2ku6fe.mongodb.net/")
+client = MongoClient("mongodb+srv://Namansoni23:Krati%2A2302@shorthandpractice.c2ku6fe.mongodb.net/")
 db = client["steno"]
 
 users = db["users"]
