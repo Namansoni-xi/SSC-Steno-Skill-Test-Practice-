@@ -2,10 +2,18 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from pymongo import MongoClient
 from evaluator import evaluate, highlight
+from fastapi.middleware.cors import CORSMiddleware
 
 result["highlight"] = highlight(master, data.user_text)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 client = MongoClient("YOUR_MONGO_URL")
 db = client["steno"]
