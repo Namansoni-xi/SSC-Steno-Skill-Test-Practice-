@@ -48,6 +48,7 @@ button{
   color:white;
   border:none;
   cursor:pointer;
+  margin-top:5px;
 }
 
 .timer{
@@ -77,14 +78,12 @@ button{
 <div class="left">
 
 <h3>Audio Dictation</h3>
-<audio id="audio" controls></audio>
+<audio id="audio" controls controlsList="nodownload noplaybackrate"></audio>
 
 <h3>Type Here</h3>
-<textarea id="text" placeholder="Start typing here..." disabled></textarea>
+<textarea id="text" disabled></textarea>
 
-<br><br>
-
-<button onclick="submitTest()">Submit</button>
+<button onclick="submitTest()">Submit Early</button>
 
 <div id="result" class="result"></div>
 
@@ -93,11 +92,10 @@ button{
 <div class="right">
 
 <h3>Instructions</h3>
-
 <ul>
-<li>Listen carefully</li>
+<li>Fullscreen mode required</li>
+<li>No copy/paste allowed</li>
 <li>Typing allowed only after dictation</li>
-<li>Do not refresh page</li>
 <li>Auto submit after time</li>
 </ul>
 
@@ -114,10 +112,18 @@ const API = "https://ssc-steno-skill-test-practice.onrender.com";
 
 let phase = "dictation";
 let time = 0;
+let interval;
 
-// show user
+// USER
 document.getElementById("user").innerText =
 localStorage.getItem("user");
+
+// 🔒 FULLSCREEN
+document.documentElement.requestFullscreen();
+
+// ❌ COPY PASTE DISABLE
+document.addEventListener("copy", e => e.preventDefault());
+document.addEventListener("paste", e => e.preventDefault());
 
 // LOAD TEST
 async function load(){
@@ -128,11 +134,8 @@ window.test = data[0];
 
 document.getElementById("audio").src = test.audio;
 
-// start dictation
+// dictation start
 time = test.dictation_time * 60;
-
-// typing disabled initially
-document.getElementById("text").disabled = true;
 
 startTimer();
 }
@@ -142,7 +145,7 @@ load();
 // TIMER
 function startTimer(){
 
-let interval = setInterval(()=>{
+interval = setInterval(()=>{
 
 time--;
 
@@ -176,8 +179,17 @@ submitTest();
 },1000);
 }
 
-// SUBMIT
+// 🎧 REWIND DISABLE
+document.getElementById("audio").addEventListener("seeking", function(){
+if(phase === "dictation"){
+this.currentTime = 0;
+}
+});
+
+// 🚀 SUBMIT
 async function submitTest(){
+
+clearInterval(interval);
 
 let res = await fetch(API+"/submit",{
 method:"POST",
