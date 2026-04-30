@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = MongoClient("mongodb+srv://username:password@cluster.mongodb.net/")
+client = MongoClient("mongodb+srv://Namansoni23:Krati*2302@shorthandpractice.c2ku6fe.mongodb.net/?appName=ShorthandPractice")
 db = client["steno"]
 
 users = db["users"]
